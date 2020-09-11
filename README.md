@@ -1,13 +1,28 @@
 # foodtruck-homework
 MVP Command line interface:
-- parse CSV of San Francisco Foodtrucks
-- load parsed CSV into memory
+- parse CSV of San Francisco Foodtrucks into an array with an item per foodtruck
 - take in a point of lat/lon
 - spin through in memory list and calculate distance to each foodtruck
-- return top 5 ordered by closest to furthest distance
+- return top N ordered by closest to furthest distance
+
+
+sample setup and invocation:
+
+```npm install```
+
+```node index.js --lat 37.7749 --lon -122.4194 --count 1```
+
+Things I'd still want to know / discuss: 
+1. anticaipated use cases - backend api?  calls per second at peak expects?
+1. will we have this for a lot bigger data set?  i.e. all cities and towns eventually?  rough gustimation of total set of data quantity and frequency of change/churn of data?
+1. anticipated reasonable SLA for latency and volume for primary use cases
+1. are there other sort mechanisms that other than distance that are important in the future? (user taste/user reviwews, friends of user reviews, ad placement, shortest queue length, newsst, unique to a spot for first time, etc. etc.)
+1. other contraints to understand?
+1. desired behavior on faulty input/ unreasonable inputs. (most popular, newest, etc)
 
 Backlog:
-1. take your location from command line as lat/lon
+1. ~~take your location from command line as lat/lon~~
+1. ~~specify number of results from command line~~
 1. measure/play: time how long it take to produce result as a baseline - understand how it changes with longer or shorter list from san fran.  as it is now we read a file, parse the file to objects, augment the objects with a new field (creating a new array), sort the array on that augmented field of the objects, then clip top - there are more efficient ways but we didn't care for MVP - how big does this need to get before we care and why - memory? unlikely, disk space? unlikely, cpu? more likely - we're using a single threaded language and spinning through a n array several times with each creating a new version of it - as a pure CLI tool - no big deal - but if you have several clients we would want to cut down on all that diskio + string parsing (deserialization from CSV) and reuse premade object array - we'd likely want to not augment the original array and make a new array that is only the distances and an index ot the original array and then sort that smaller object - likely fits in fewer pages and makes L2 cache more efficient dealing with smaller block of stuff to sort regardless of algorithm or approach from there.  Once we flip to web service we can run a container per CPU and let those be the SMP play on box.  repeating a call with a variety of locations inside nd outside of san fran a couple 10k times and looking at the histograms of latencies tells us if there is consistent latency or modals in it and figure out why.
 1. replace csv load with streaming solution rather than load all data into varable from file and theen parse that variable.  we likely could reduce memory footprint, have more work done parsing and deserializing per asyncio read chunk - since each io requires an interupt and another event popped on the event loop that won't happen until data is ready. so we likely have fast enough processors today to chunk through deserialization faster than read over a network and if we're running on azure VMs even disk storage in the VM can be over the network.  so we might be able to keep up with read speeds while deserializaing.  Only effects startup time - but if this was performed as the equivalent of an azure function/aws lambda we might have a LOT of times we are starting from scratch.
 1. take your location as a freeform text to lookup on google maps api and pick first best closest (traps: have to have interactive confirmation if not high confidence in lookup)

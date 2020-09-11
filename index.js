@@ -8,6 +8,7 @@ const options = yargs
     .usage("Usage: --lat <latitude --lon longitude")
     .option("lat", { alias: "latitude", describe: "Latitude", type: "number", demandOption: true })
     .option("lon", { alias: "longitude", describe: "longitude", type: "number", demandOption: true })
+    .option("count", { alias: "c", describe: "count of results desired", type: "number", demandOption: false, default: 5 })
     .argv;
 /*
  * Read Data Async
@@ -86,7 +87,7 @@ if (require.main === module) {
     const locationOfInterest = {lat: options.lat, lon: options.lon};
     const csv = readFoodTruckCSV("./Mobile_Food_Facility_Permit.csv");
     const data = parseCsvFile(csv);
-    const result = returnClosestNFoodtrucks(locationOfInterest, data, 5)
+    const result = returnClosestNFoodtrucks(locationOfInterest, data, options.count);
     result.then((result) => console.log(result));
 }
 
