@@ -2,7 +2,13 @@ const fs = require('fs')
 const { parse } = require('fast-csv');
 const geodist = require('geodist');
 const _ = require('lodash');
+const yargs = require('yargs');
 
+const options = yargs
+    .usage("Usage: --lat <latitude --lon longitude")
+    .option("lat", { alias: "latitude", describe: "Latitude", type: "number", demandOption: true })
+    .option("lon", { alias: "longitude", describe: "longitude", type: "number", demandOption: true })
+    .argv;
 /*
  * Read Data Async
  */
@@ -76,7 +82,8 @@ if (require.main === module) {
     /*
      * dummy value for lat/lon until we determine how user provides location - this is generic "san francisco" form google
      */
-    const locationOfInterest = {lat: 37.7749, lon: -122.4194};
+//    const locationOfInterest = {lat: 37.7749, lon: -122.4194}; // middle of san fran
+    const locationOfInterest = {lat: options.lat, lon: options.lon};
     const csv = readFoodTruckCSV("./Mobile_Food_Facility_Permit.csv");
     const data = parseCsvFile(csv);
     const result = returnClosestNFoodtrucks(locationOfInterest, data, 5)
